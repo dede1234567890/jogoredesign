@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080612" />
+  <title>Jogo de Cartas SWIFT</title>
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@19.0.0",
+      "react/jsx-runtime": "https://esm.sh/react@19.0.0/jsx-runtime",
+      "react-dom/client": "https://esm.sh/react-dom@19.0.0/client"
+    }
+  }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Oswald', sans-serif;
+  --font-body: 'Nunito', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-bg: #080612;
+  --color-surface: #110f22;
+  --color-surface2: #1a1733;
+  --color-border: #2d2850;
+  --color-gold: #fbbf24;
+  --color-organica: #16a34a;
+  --color-organica-bg: #052e16;
+  --color-organica-glow: #4ade80;
+  --color-mais: #2563eb;
+  --color-mais-bg: #1e1b4b;
+  --color-mais-glow: #60a5fa;
+  --color-premium: #dc2626;
+  --color-premium-bg: #450a0a;
+  --color-premium-glow: #f87171;
+  --color-classico: #d97706;
+  --color-classico-bg: #451a03;
+  --color-classico-glow: #fbbf24;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root {
+  width: 100%; height: 100%;
+  margin: 0; padding: 0; overflow: hidden;
+}
+
+body {
+  background-color: #080612;
+  font-family: 'Nunito', sans-serif;
+  color: #f1f5f9;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2d2850; border-radius: 2px; }
+
+/* ─── Card styles ─────────────────────────────────────────────────────────── */
+.card-organica {
+  --glow: #4ade80;
+  border-color: #16a34a;
+  background: linear-gradient(145deg, #052e16, #065f46);
+}
+.card-mais {
+  --glow: #60a5fa;
+  border-color: #2563eb;
+  background: linear-gradient(145deg, #1e1b4b, #1e3a8a);
+}
+.card-premium {
+  --glow: #f87171;
+  border-color: #dc2626;
+  background: linear-gradient(145deg, #450a0a, #7f1d1d);
+}
+.card-classico {
+  --glow: #fbbf24;
+  border-color: #d97706;
+  background: linear-gradient(145deg, #451a03, #78350f);
+}
+
+.card-selected {
+  transform: translateY(-14px) scale(1.06);
+  box-shadow: 0 0 24px var(--glow), 0 0 48px color-mix(in srgb, var(--glow) 30%, transparent);
+  z-index: 10;
+}
+
+.card-base {
+  transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.14s ease;
+  cursor: pointer;
+  position: relative;
+}
+.card-base:hover:not(.card-selected) {
+  transform: translateY(-7px) scale(1.02);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.6), 0 0 12px color-mix(in srgb, var(--glow) 20%, transparent);
+}
+
+.card-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Card deal animation */
+@keyframes cardDealIn {
+  0% { transform: translateY(120px) rotate(8deg) scale(0.7); opacity: 0; }
+  60% { transform: translateY(-6px) rotate(-1deg) scale(1.03); opacity: 1; }
+  100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+}
+.card-deal {
+  animation: cardDealIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Card play animation (fly up) */
+@keyframes cardPlayOut {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  50% { transform: translateY(-80px) scale(1.15); opacity: 0.8; }
+  100% { transform: translateY(-160px) scale(0.6); opacity: 0; }
+}
+.card-play-out {
+  animation: cardPlayOut 0.35s ease-in both;
+  pointer-events: none;
+}
+
+/* ─── Floating text ───────────────────────────────────────────────────────── */
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  20% { transform: translateX(-50%) translateY(-8px) scale(1.15); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-70px) scale(0.8); }
+}
+.float-up {
+  animation: floatUp 1.2s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ─── Score reveal overlay ────────────────────────────────────────────────── */
+.score-reveal-overlay {
+  background: linear-gradient(135deg, #0f0a1eee, #1a0d0dee);
+  border: 2px solid #2d2850;
+  border-radius: 1.25rem;
+}
+
+@keyframes revealHand {
+  0% { transform: translateY(-12px) scale(0.9); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.score-reveal-hand {
+  animation: revealHand 0.3s ease-out both;
+}
+
+.score-pill {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0.5rem 1rem; border-radius: 0.625rem; border-width: 2px;
+  transition: all 0.3s ease;
+}
+.score-label {
+  font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.08em;
+  font-family: 'Oswald', sans-serif; color: #94a3b8; margin-bottom: 0.15rem;
+}
+.score-value {
+  font-size: 1.25rem; font-weight: 900; line-height: 1;
+  font-family: 'JetBrains Mono', monospace;
+}
+.score-pill-chips {
+  background: #1e3a5f; border-color: #3b82f6; color: #93c5fd;
+}
+.score-pill-mult {
+  background: #4a1515; border-color: #dc2626; color: #fca5a5;
+}
+.score-pill-score {
+  background: #3d2800; border-color: #fbbf24; color: #fbbf24;
+  font-size: 1.5rem;
+}
+.score-pill-dim { opacity: 0.35; transform: scale(0.92); }
+.score-pill-active { opacity: 1; transform: scale(1); }
+.score-pill-counting { opacity: 1; }
+
+@keyframes pillPulse {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.12); box-shadow: 0 0 20px #dc2626; }
+}
+.score-pill-pulse { animation: pillPulse 0.35s ease; }
+
+@keyframes pillPulseGold {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.15); box-shadow: 0 0 30px #fbbf24; }
+}
+.score-pill-pulse-gold { animation: pillPulseGold 0.45s ease; }
+
+/* ─── Screen flash ────────────────────────────────────────────────────────── */
+@keyframes flashFade {
+  0% { opacity: 0.5; }
+  100% { opacity: 0; }
+}
+.screen-flash {
+  animation: flashFade 0.5s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ─── Boss blind entry shake ──────────────────────────────────────────────── */
+@keyframes bossShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+.boss-shake { animation: bossShake 0.5s ease; }
+
+/* ─── Joker glow ring ─────────────────────────────────────────────────────── */
+@keyframes jokerGlow {
+  0% { opacity: 0; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+.joker-glow-ring {
+  position: absolute; inset: -4px;
+  border-radius: inherit;
+  border: 2px solid #fbbf24;
+  box-shadow: 0 0 16px #fbbf24;
+  animation: jokerGlow 0.5s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ─── Ambient background ──────────────────────────────────────────────────── */
+@keyframes ambientFloat {
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.05; }
+  90% { opacity: 0.05; }
+  100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+}
+.ambient-bg { z-index: 0; }
+.ambient-particle {
+  position: absolute;
+  bottom: -60px;
+  animation: ambientFloat linear infinite;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ─── Tutorial enter ──────────────────────────────────────────────────────── */
+@keyframes tutorialEnter {
+  0% { transform: scale(0.92) translateY(12px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+.tutorial-enter { animation: tutorialEnter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* ─── Win celebration ring ────────────────────────────────────────────────── */
+@keyframes winRingPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+  50% { box-shadow: 0 0 0 20px rgba(34,197,94,0); }
+}
+.win-ring { animation: winRingPulse 1.2s ease infinite; }
+
+/* ─── Score counter ───────────────────────────────────────────────────────── */
+@keyframes scoreTick {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); color: #fbbf24; }
+}
+.score-ticking { animation: scoreTick 0.08s ease; }
+
+/* ─── Button styles ───────────────────────────────────────────────────────── */
+.btn-primary {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #1c1003;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: all 0.15s ease;
+  border: none; cursor: pointer;
+}
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fcd34d, #fbbf24);
+  box-shadow: 0 0 20px rgba(251,191,36,0.5);
+  transform: translateY(-2px);
+}
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-secondary {
+  background: #1a1733; border: 1px solid #2d2850;
+  color: #94a3b8;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  transition: all 0.15s ease; cursor: pointer;
+}
+.btn-secondary:hover:not(:disabled) {
+  border-color: #4b5563; color: #e2e8f0; background: #221f40;
+}
+.btn-secondary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: #fff;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  transition: all 0.15s ease; border: none; cursor: pointer;
+}
+.btn-danger:hover { box-shadow: 0 0 16px rgba(220,38,38,0.5); transform: translateY(-1px); }
+
+/* ─── Employee/Joker card ─────────────────────────────────────────────────── */
+.employee-card {
+  background: linear-gradient(145deg, #1a1733, #221f40);
+  border: 1px solid #2d2850;
+  transition: all 0.2s ease;
+  position: relative;
+}
+.employee-card:hover {
+  border-color: #fbbf24;
+  box-shadow: 0 0 12px rgba(251,191,36,0.2);
+  transform: translateY(-2px);
+}
+
+/* ─── Noise overlay ───────────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+}
+
+/* ─── Running score animated counter ─────────────────────────────────────── */
+@keyframes scoreAdd {
+  0% { color: #fbbf24; transform: scale(1.15); text-shadow: 0 0 20px #fbbf24; }
+  100% { color: inherit; transform: scale(1); text-shadow: none; }
+}
+.score-added { animation: scoreAdd 0.6s ease-out; }
+
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

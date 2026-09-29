@@ -1,0 +1,8 @@
+VERSÃO ESTÁTICA CORRIGIDA PARA GITHUB PAGES
+
+1. Envie TODOS estes arquivos para a raiz do repositório.
+2. Settings > Pages > Source: Deploy from a branch.
+3. Branch: main / (root) > Save.
+4. Não use GitHub Actions para esta versão.
+
+Importante: index.html e main.js precisam ficar lado a lado na raiz.

@@ -1,0 +1,20 @@
+JOGO SWIFT — PACOTE LIMPO PARA O REPOSITÓRIO "jogo"
+
+Este pacote já está no MESMO FORMATO que funcionou no seu GitHub: os arquivos do jogo ficam na raiz.
+
+COMO SUBIR:
+1. Extraia o ZIP.
+2. Abra a pasta Jogo_SWIFT_PRONTO_GITHUB.
+3. No repositório GitHub "jogo", apague os arquivos antigos do jogo (ou use um repositório limpo).
+4. Clique em Add file > Upload files.
+5. Arraste TODO o conteúdo desta pasta para a raiz do repositório.
+6. Clique em Commit changes.
+7. Em Settings > Pages, deixe Source = GitHub Actions.
+8. Aguarde a Action "Publicar site no GitHub Pages" ficar verde.
+9. Link: https://dede1234567890.github.io/jogo/
+
+CORREÇÕES DE BALANCEAMENTO:
+- Boss 5: Sem descarte + Avaro, meta 8.3x
+- Boss 6: Apressado + Avaro, meta 8.6x — JOKERS CONTINUAM FUNCIONANDO
+- Boss 7: Misturado + Sem Orgânico, meta 9.1x
+- Boss 8: Austero + Sem Premium, meta 9.6x
